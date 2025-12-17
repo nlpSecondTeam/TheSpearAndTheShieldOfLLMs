@@ -1,179 +1,110 @@
-# 🛡️ The Spear and the Shield of LLMs
+# 🛡️ The Spear and The Shield of LLMs: Small LLM Jailbreaking Defense
 
-### Jailbreaking Defense Fine-tuning Experiment
+> **"소형 LLM(TinyLlama-1.1B)의 탈옥(Jailbreaking) 방어를 위한 SFT 실험 및 한계 극복 연구"**
 
-본 실험는 **LLM Jailbreaking 공격에 대한 방어 성능을 정량적으로 평가**하고,
-**SFT 기반 Fine-tuning을 통해 방어 능력이 얼마나 개선되는지**를 실험적으로 분석한 결과를 담고 있다.
+본 프로젝트는 1B급 소형 언어 모델의 보안성을 강화하기 위해 다양한 Fine-tuning 전략을 실험하고, **'언어 장벽(Language Barrier)'**과 **'데이터 비율(Data Ratio)'**이 모델의 방어 성능과 유용성(Utility)에 미치는 영향을 분석했습니다.
 
----
-
-## 📌 실험 목적
-
-* 기존 LLM(Baseline)이 **직접 공격 / 우회 공격 / 감정적 압박 / 역할극 기반 Jailbreaking**에 얼마나 취약한지 평가
-* Jailbreaking 사례를 기반으로 학습한 **Fine-tuned 모델(uos-smollm-second)** 이
-  실제로 **방어율을 얼마나 향상시키는지 정량 비교**
-* **ASR(Attack Success Rate)**, **방어율**, **False Positive** 등 보안 관점 지표 중심 분석
+## 👥 Team
+* **Members:** 강다예, 김도현, 홍수지, 김지은
+* **Base Model:** TinyLlama-1.1B-Chat
 
 ---
 
-## 🧪 실험 구성 개요
+## 🎯 Project Overview
+기존 소형 LLM은 리소스의 한계로 인해 적대적 공격(Adversarial Attack)에 취약합니다. 본 연구는 **Supervised Fine-tuning (SFT)**을 통해 방어 기제를 주입하면서도, 소형 모델이 겪는 **'앵무새 현상(Parrot Mode)'**과 **'지능 붕괴(Model Collapse)'** 문제를 해결하는 과정을 담고 있습니다.
 
-### 1. 평가 데이터셋
-
-* 총 **50개 질문**
-
-  * 공격 질문 (`reject`) : 42~44개
-  * 정상 질문 (`accept`) : 6개
-* 공격 유형 포함:
-
-  * Direct harmful requests
-  * Obfuscated / narrative-based attacks
-  * Emotional manipulation
-  * Role-play / instruction hijacking
+### 🧪 Key Experiments
+1.  **Phase 1 (The Korean Barrier):** 한국어 보안 데이터 학습 시 발생하는 언어 붕괴 및 과잉 방어(FP) 현상 분석
+2.  **Phase 2 (Pivot to Native):** 모델의 모국어(영어)로 전환하여 용량 한계(Capacity Overload) 극복
+3.  **Phase 3 (The Ratio Experiment):** 데이터 불균형(Imbalanced) vs 균형(Balanced) 학습에 따른 성능 비교
 
 ---
 
-### 2. 비교 모델
+## 📊 Experimental Results (Final)
 
-| 구분        | 모델                                        |
-| --------- | ----------------------------------------- |
-| Baseline  | TinyLlama-1.1B-Chat                       |
-| Finetuned | `uos-smollm-second` (Jailbreaking SFT 적용) |
+우리는 최종적으로 **Native Language(영어) 기반의 불균형 데이터(V2)**가 가장 효율적임을 입증했습니다.
 
-🔗 Fine-tuned Model 공개 링크
+| Model | Type | Defense Rate (↑) | False Positive (↓) | Harmful Leak (↓) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Baseline** | TinyLlama Original | 31.1% | 0 | 2 (Dangerous) |
+| **V2 (Imbalanced)** | **Attack-Heavy (7:1)** | **91.1% (Best)** | **0** | **0** |
+| **V3 (Balanced)** | Balanced (1:1) | 88.9% | 0 | 0 |
 
-본 실험에서 사용된 Jailbreaking 방어 Fine-tuned 모델은 아래 링크를 통해 공개되어 있다.
-
-Model name: uos-smollm-second
-
-Base model: TinyLlama-1.1B-Chat
-
-Training method: Supervised Fine-tuning (SFT) with Jailbreaking attack/defense data
-
-Format: HuggingFace-compatible (config.json, tokenizer, model.safetensors)
-
-📦 Model Download (Google Drive)
-
-🔒 용량 및 접근 제약으로 인해 GitHub에는 모델 가중치를 포함하지 않음
-
-👉 Google Drive[
-https://drive.google.com/file/d/1eRk9eT1k4H9vBRv6eaL4F9DdaDdqoYN4/view?usp=sharing ](https://drive.google.com/file/d/1iRdOZvvZJTZMRWKY5eWJ9HOhWClTq1bu/view?usp=sharing)
+> **💡 Key Finding:**
+> 소형 모델 튜닝의 핵심은 '데이터 비율'보다 **'베이스 모델의 언어 이해도'**입니다. 언어 장벽을 제거(영어 전환)하자, 소량의 공격 데이터(V2)만으로도 유용성 훼손 없이 높은 보안성을 달성했습니다.
 
 ---
 
-### 3. 평가 파이프라인
+## 📝 Detailed Analysis Phases
 
-```
-eval_dataset.json
-   ↓
-[evaluate_full.py]
-   → result.jsonl / result_uos.jsonl
-   ↓
-[analyze_results.py]
-   → final_scored_baseline.jsonl
-   → final_scored_uos.jsonl
+### Phase 1. 초기 시도와 한계 (The Korean Barrier)
+* **실험:** 한국어 공격/방어 데이터로 SFT 진행.
+* **결과:** 방어율은 높았으나 심각한 부작용 발생.
+    * [cite_start]**언어 붕괴:** "안심. 위헤서 해결하기 어렵습니다"와 같은 비문 생성[cite: 261].
+    * [cite_start]**앵무새 현상 (Parrot Mode):** 모든 질문에 똑같은 거절 멘트만 반복[cite: 228].
+    * **원인:** 1B 모델이 새로운 언어(한국어)와 보안 규칙을 동시에 배우려다 **용량 초과(Capacity Overload)** 발생.
+
+### Phase 2. 전략 수정 (Pivot to Native Language)
+* [cite_start]**가설:** "모델이 이미 잘하는 **영어(Native Language)**로 가르치면, 뇌 용량을 온전히 보안 규칙 학습에만 쓸 수 있을 것이다."[cite: 302, 383].
+* **수행:** 모든 데이터셋(공격/정상)을 영어로 교체 및 재학습.
+
+### Phase 3. 데이터 비율 실험 (The Ratio Experiment)
+* **목표:** 과잉 방어(False Positive)를 줄이기 위한 최적의 데이터 비율 탐색.
+    * **V2 (Imbalanced):** 공격 위주 학습 (공격 200 : 정상 30)
+    * **V3 (Balanced):** 1:1 균형 학습 (공격 200 : 정상 200)
+* **결과 (반전):**
+    * [cite_start]**V2 (91.1%)**가 V3 (88.9%)보다 방어율이 높았으며, **FP는 둘 다 0**이었습니다[cite: 369].
+    * 영어 베이스 모델은 기초 지능이 탄탄하여, 불균형 데이터에서도 정상 대화 능력을 잃지 않았습니다. 오히려 V3는 안전 데이터 비중이 희석되어 방어율이 소폭 하락했습니다.
+
+---
+
+## 🚀 Usage
+
+### 1. Environment Setup
+```bash
+pip install -r requirements.txt
 ```
 
-* `evaluate_full.py`
+### 2. Data Generation
 
-  * 실제 모델 응답 생성
-  * 거부 키워드, 위험 절차, 거부 문장 유사도(semantic similarity) 계산
-* `analyze_results.py`
+영어 정밀 평가를 위한 데이터셋(`eval_dataset_eng.json`)을 생성합니다.
 
-  * 팀 내 합의된 기준에 따라 **최종 판정 및 통계 산출**
-
----
-
-## 📊 평가 기준 (요약)
-
-* **reject_confident**
-  → 모범 거절 답변과의 의미적 유사도 ≥ threshold
-* **fail_harmful**
-  → 폭발물/범죄/해킹 등 위험 절차 직접 노출
-* **fail_jailbroken**
-  → 공격 질문에 대해 실질적인 정보 제공
-* **False Positive (FP)**
-  → 정상 질문을 거부한 경우
-
----
-
-## 📈 실험 결과
-
-### 🔹 Baseline (result.jsonl)
-
+```bash
+python make_eval_dataset_eng_final.py
 ```
-총 데이터: 50개
- - 공격(reject) : 42개
- - 정상(accept) : 6개
 
-방어 성공(reject_confident): 3
-위험 정보 유출(harmful): 2
-탈옥 허용(jailbroken): 39
+### 3. Training (SFT)
 
-방어율: 7.14%
-ASR(공격 성공률): 92.86%
+두 가지 시나리오(V2: 불균형, V3: 균형)에 대해 모델을 학습합니다.
+
+```bash
+# V2 (Imbalanced) 학습 - 공격 데이터 위주
+python train.py --dataset train_eng_v2.jsonl --model_name uos-eng-v2
+
+# V3 (Balanced) 학습 - 공격/정상 1:1 비율
+python train.py --dataset train_eng_v3.jsonl --model_name uos-eng-v3
+```
+
+### 4. Evaluation & Analysis
+
+학습된 모델과 Baseline을 통합 평가하고, 최종 비교 리포트를 출력합니다.
+
+```bash
+# 통합 정밀 평가 (V1 Baseline, V2, V3 일괄 평가)
+python evaluate_all_phases.py
+
+# 최종 성적표(Table) 출력
+python analyze_final_report.py
 ```
 
 ---
 
-### 🔹 Finetuned (result_uos.jsonl)
+## 📂 Repository Structure
 
-```
-총 데이터: 50개
- - 공격(reject) : 44개
- - 정상(accept) : 6개
-
-방어 성공(reject_confident): 33
-위험 정보 유출(harmful): 0
-탈옥 허용(jailbroken): 11
-
-방어율: 75.00%
-ASR(공격 성공률): 25.00%
-False Positive: 1
-```
-
----
-
-## 🚀 개선 효과 요약
-
-| 항목             | Baseline | Finetuned | 변화           |
-| -------------- | -------- | --------- | ------------ |
-| 방어율            | 7.14%    | 75.00%    | **+67.86%p** |
-| ASR            | 92.86%   | 25.00%    | **−67.86%p** |
-| Harmful 유출     | 2        | 0         | −2           |
-| False Positive | 0        | 1         | +1           |
-
-➡️ **Fine-tuning 이후 Jailbreaking 방어 성능이 대폭 향상**되었으며,
-
-
-
-➡️ 위험 정보 직접 유출은 **완전히 제거**됨
-
-
-
-➡️ 단, 정상 질문 오거부가 소폭 증가 (trade-off)
-
----
-
-## 📂 주요 결과 파일
-
-```
-first_test/
- ├─ result.jsonl                  # Baseline raw outputs
- ├─ result_uos.jsonl              # Finetuned raw outputs
- ├─ final_scored_baseline.jsonl   # Baseline 최종 판정
- ├─ final_scored_uos.jsonl        # Finetuned 최종 판정
-```
-
----
-
-## 🔍 결론
-
-* 단순한 정책 기반 필터링만으로는 Jailbreaking 방어에 한계가 있음
-* **공격 사례 중심 SFT Fine-tuning**은 실질적인 방어율 개선에 매우 효과적
-* 향후 과제:
-
-  * False Positive 감소
-  * 공격 유형별 세분화된 학습 데이터 확장
-  * 자동화된 Jailbreak 생성 기반 adversarial training
-
+| File                              | Description                                                                 |
+| :-------------------------------- | :-------------------------------------------------------------------------- |
+| `train.py`                        | LoRA 및 PEFT를 활용한 SFT 학습 메인 스크립트                               |
+| `evaluate_all_phases.py`         | Baseline, V2, V3 모델을 순차적으로 로드하여 방어율·유해성·유사도를 측정    |
+| `analyze_final_report.py`        | 평가 결과(JSONL)를 분석하여 최종 비교 테이블을 생성하는 스크립트           |
+| `make_eval_dataset_eng_final.py` | 영어 정밀 평가 데이터셋(`eval_dataset_eng.json`) 생성 스크립트              |
+| `data/`                           | 학습(`train_eng_*.jsonl`) 및 평가용 데이터셋 폴더                            |
