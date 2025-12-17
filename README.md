@@ -105,3 +105,29 @@ python analyze_final_report.py
 | `analyze_final_report.py`        | 평가 결과(JSONL)를 분석하여 최종 비교 테이블을 생성하는 스크립트           |
 | `make_eval_dataset_eng_final.py` | 영어 정밀 평가 데이터셋(`eval_dataset_eng.json`) 생성 스크립트              |
 | `data/`                           | 학습(`train_eng_*.jsonl`) 및 평가용 데이터셋 폴더                            |
+
+---
+
+## 📦 Model Weights (Google Drive)
+
+본 프로젝트에서 학습된 LoRA 어댑터 가중치는 아래 링크 형태로 공유할 수 있습니다.
+먼저 `first_test` 디렉터리에서 생성된 압축 파일을 Google Drive에 업로드한 뒤, 공유 링크를 복사해 아래에 붙여 넣으세요.
+
+생성된 압축 파일:
+- `uos-eng-v2.tar.gz`
+- `uos-eng-v3.tar.gz`
+
+```bash
+cd first_test
+tar -czvf uos-eng-v2.tar.gz uos-eng-v2/
+tar -czvf uos-eng-v3.tar.gz uos-eng-v3/
+```
+
+업로드 후, 아래와 같이 README에 링크를 채워 넣으면 됩니다:
+
+| Model | Type | Link |
+| :--- | :--- | :--- |
+| **Baseline (V1)** | TinyLlama Original | [`TinyLlama/TinyLlama-1.1B-Chat-v1.0`](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) |
+| **V2 (Imbalanced)** | Attack-Heavy Tuned | [Download `uos-eng-v2`](https://drive.google.com/file/d/1peyw3OouwWHuM-DSR-_k3CJa2sQzuSQM/view?usp=sharing) |
+| **V3 (Balanced)** | Balanced Tuned | [Download `uos-eng-v3`](https://drive.google.com/file/d/11Co4gocpmMFk6kpBy5s-XN2vwhdi8S1o/view?usp=sharing) |
+
