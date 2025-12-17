@@ -2,7 +2,7 @@
 
 > **"소형 LLM(TinyLlama-1.1B)의 탈옥(Jailbreaking) 방어를 위한 SFT 실험 및 한계 극복 연구"**
 
-본 프로젝트는 1B급 소형 언어 모델의 보안성을 강화하기 위해 다양한 Fine-tuning 전략을 실험하고, **'언어 장벽(Language Barrier)'**과 **'데이터 비율(Data Ratio)'**이 모델의 방어 성능과 유용성(Utility)에 미치는 영향을 분석했습니다.
+본 프로젝트는 1B급 소형 언어 모델의 보안성을 강화하기 위해 다양한 Fine-tuning 전략을 실험하고, '**언어 장벽(Language Barrier)**'과 '**데이터 비율(Data Ratio)**'이 모델의 방어 성능과 유용성(Utility)에 미치는 영향을 분석했습니다.
 
 
 ---
