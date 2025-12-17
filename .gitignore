@@ -1,0 +1,17 @@
+# 파이썬 캐시 무시
+__pycache__/
+*.pyc
+
+# 모델 저장 폴더 무시 (용량이 너무 큼)
+uos-smollm-*/
+results/
+wandb/
+uos-eng-*/
+
+# 가상환경 무시
+.env
+venv/
+env/
+
+# (선택) 데이터셋이 너무 크면 무시, 작으면 포함
+# *.jsonl 
